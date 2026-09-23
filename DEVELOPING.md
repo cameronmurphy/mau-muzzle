@@ -57,6 +57,27 @@ you open MAU, switch away, and it jumps back in front later, it's hidden again.
 `decide(silent:sinceLaunch:sinceClick:commandHeld:)` is pure and covered by
 `--selftest`.
 
+## Quitting it
+
+Each time a silent MAU is hidden, a 5-minute timer starts for that instance,
+unless one is already running, so being hidden again doesn't push it back. When
+you bring MAU up, the timer is cancelled. When the timer fires, MAU is quit with
+`terminate()`, the same as Cmd-Q, if it's still hidden and not in front.
+
+MAU's window is only a front end. Updates are downloaded by Microsoft Update
+Assistant and installed by the privileged helper
+`com.microsoft.autoupdate.helper`. If either is busy, the quit waits and checks
+again every 60 seconds. Busy means:
+
+- **The helper is running.** launchd only starts it on demand, for an install,
+  a clone or cleanup. It also runs briefly while MAU starts up and closes, and
+  then exits within a minute or so.
+- **The assistant used over 1s of CPU since the last check.** Just being alive
+  proves nothing: it stays running for as long as MAU is open. Idle, it used
+  0.7s in its first three minutes, including startup.
+
+`decideQuit(hidden:active:updating:)` is pure and covered by `--selftest`.
+
 ### What it can't do
 
 Activation is reported after it happens, so MAU is in front for a moment before

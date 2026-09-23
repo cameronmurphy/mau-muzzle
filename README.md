@@ -12,9 +12,12 @@ the way instead.
 - When you want it, click its Dock icon or Cmd-Tab to it, and it comes up
   normally.
 - If it tries to jump in front again later, it's hidden again.
+- If you leave it hidden for 5 minutes, it's quit. Bringing it up from the Dock
+  cancels that.
 
-MAU is never closed, so updates still install. If you open MAU yourself (for
-example from Help > Check for Updates), it's left alone.
+It never quits MAU while an update is downloading or installing, and never
+force-quits it, so updates still install. If you open MAU yourself (for example
+from Help > Check for Updates), it's left alone.
 
 ## Install
 
