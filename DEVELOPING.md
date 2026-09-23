@@ -101,7 +101,32 @@ make notarize
 
 ## CI
 
-`.github/workflows/build.yml` is the same pipeline as privileges-rearm, and uses
-the same secrets. It builds, signs, uploads an artifact, and for `v*` tags it
-notarizes, staples, and attaches to a release. Without secrets it falls back to
-an unsigned compile check.
+`.github/workflows/release.yml` runs only when a `v*` tag is pushed. Branch
+pushes and pull requests build nothing. Every run is a release: it runs the
+self test, signs, notarizes, staples, and attaches the zip to a GitHub release.
+
+There's no unsigned fallback. An unnotarized download is refused by Gatekeeper,
+so a missing secret fails the run before it builds.
+
+It uses the same secrets as privileges-rearm, but they're set per repository,
+so they have to be set again here:
+
+| Secret | What it is |
+| --- | --- |
+| `CERT_P12_BASE64` | Developer ID cert + key, exported as `.p12`, base64, unwrapped |
+| `CERT_P12_PASSWORD` | password used for that `.p12` export |
+| `KEYCHAIN_PASSWORD` | any string, for the throwaway CI keychain |
+| `SIGN_IDENTITY` | e.g. `Developer ID Application: Name (TEAMID)` |
+| `AC_API_KEY_BASE64` | App Store Connect `.p8`, base64, unwrapped |
+| `AC_API_KEY_ID` | that key's ID |
+| `AC_API_ISSUER_ID` | the App Store Connect issuer ID |
+
+```sh
+base64 -i Certificates.p12 | tr -d '\n' | gh secret set CERT_P12_BASE64
+gh secret set CERT_P12_PASSWORD
+base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n' | gh secret set AC_API_KEY_BASE64
+gh secret set AC_API_KEY_ID
+gh secret set AC_API_ISSUER_ID
+```
+
+Delete the exported `.p12` afterwards; it contains your private key.
